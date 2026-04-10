@@ -2,15 +2,31 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
-  LayoutDashboard, Sparkles, FolderOpen, UserCircle, LogOut, BookOpen, Menu, X,
+  LayoutDashboard, Sparkles, FolderOpen, UserCircle, LogOut, BookOpen, Menu, X, ClipboardList, Brain,
 } from "lucide-react";
+import { APP_NAME } from "@/lib/constants";
 
-const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-  { label: "Generate Content", icon: Sparkles, path: "/generate" },
-  { label: "Saved Materials", icon: FolderOpen, path: "/saved" },
-  { label: "Profile", icon: UserCircle, path: "/profile" },
-];
+const getNavItems = (role) => {
+  const common = [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+    { label: "Saved Materials", icon: FolderOpen, path: "/saved" },
+    { label: "Quizzes", icon: ClipboardList, path: "/quizzes" },
+    { label: "Profile", icon: UserCircle, path: "/profile" },
+  ];
+  
+  if (role === 'student') {
+    return common;
+  }
+  
+  return [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+    { label: "Generate Quiz", icon: Sparkles, path: "/generate" },
+    { label: "Saved Materials", icon: FolderOpen, path: "/saved" },
+    { label: "Quizzes", icon: ClipboardList, path: "/quizzes" },
+    { label: "Chat Assistant", icon: Brain, path: "/rag" },
+    { label: "Profile", icon: UserCircle, path: "/profile" },
+  ];
+};
 
 const DashboardLayout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -29,11 +45,11 @@ const DashboardLayout = ({ children }) => {
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sidebar-primary">
           <BookOpen className="h-5 w-5 text-sidebar-primary-foreground" />
         </div>
-        <span className="font-display text-base font-bold text-sidebar-accent-foreground">TeachAI</span>
+        <span className="font-display text-base font-bold text-sidebar-accent-foreground">{APP_NAME}</span>
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
-        {navItems.map((item) => {
+        {getNavItems(user?.role).map((item) => {
           const active = location.pathname === item.path;
           return (
             <Link
@@ -101,7 +117,7 @@ const DashboardLayout = ({ children }) => {
             <Menu className="h-5 w-5" />
           </button>
           <h1 className="font-display text-lg font-semibold text-foreground">
-            {navItems.find((i) => i.path === location.pathname)?.label || "Dashboard"}
+            {getNavItems(user?.role).find((i) => i.path === location.pathname)?.label || "Dashboard"}
           </h1>
         </header>
         <main className="flex-1 overflow-y-auto p-4 lg:p-8 animate-fade-in">{children}</main>

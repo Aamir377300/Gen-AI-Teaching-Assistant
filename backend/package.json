@@ -4,17 +4,23 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "concurrently -n \"NODE,FASTAPI\" -c \"bold.cyan,bold.yellow\" \"nodemon src/server.js\" \"cd RAG && python3 -m uvicorn api.api:app --reload --port 8000\""
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "mongoose": "^8.0.3",
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
+    "cloudinary": "^2.9.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "cors": "^2.8.5"
+    "express": "^4.18.2",
+    "form-data": "^4.0.5",
+    "groq-sdk": "^1.1.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
+    "multer": "^2.1.1",
+    "pdfkit": "^0.18.0"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "nodemon": "^3.0.2"
   }
 }

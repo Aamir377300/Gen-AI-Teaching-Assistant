@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { BookOpen, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { GRADE_LEVELS, CURRICULA } from "@/lib/constants";
 
 const SignupPage = () => {
   const [form, setForm] = useState({
@@ -112,19 +113,14 @@ const SignupPage = () => {
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Grade</label>
                 <select value={form.gradeLevel} onChange={(e) => update("gradeLevel", e.target.value)} className={selectClass} required>
                   <option value="">Select</option>
-                  {Array.from({ length: 12 }, (_, i) => <option key={i}>Grade {i + 1}</option>)}
+                  {GRADE_LEVELS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
                 </select>
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Curriculum</label>
                 <select value={form.curriculum} onChange={(e) => update("curriculum", e.target.value)} className={selectClass} required>
                   <option value="">Select</option>
-                  <option>CBSE</option>
-                  <option>ICSE</option>
-                  <option>IB</option>
-                  <option>Cambridge</option>
-                  <option>State Board</option>
-                  <option>Common Core</option>
+                  {CURRICULA.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
               </div>
             </div>

@@ -7,6 +7,9 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   gradeLevel: { type: String, required: true },
   curriculum: { type: String, required: true },
+  role: { type: String, enum: ['teacher', 'student'], default: 'teacher' },
+  studentId: { type: String, unique: true, sparse: true },
+  generatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 // Hash password before saving

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "@/services/api";
+import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from "@/lib/constants";
 
 const AuthContext = createContext(undefined);
 
@@ -15,8 +16,8 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("auth_token");
-    const savedUser = localStorage.getItem("auth_user");
+    const savedToken = localStorage.getItem(AUTH_TOKEN_KEY);
+    const savedUser = localStorage.getItem(AUTH_USER_KEY);
     if (savedToken && savedUser) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
@@ -31,8 +32,8 @@ export const AuthProvider = ({ children }) => {
       
       setUser(userData);
       setToken(authToken);
-      localStorage.setItem("auth_token", authToken);
-      localStorage.setItem("auth_user", JSON.stringify(userData));
+      localStorage.setItem(AUTH_TOKEN_KEY, authToken);
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
     } catch (error) {
       throw new Error(error.response?.data?.message || "Login failed");
     }
@@ -40,13 +41,14 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (data) => {
     try {
-      const response = await api.post("/auth/signup", data);
+      const { confirmPassword, ...payload } = data;
+      const response = await api.post("/auth/signup", payload);
       const { token: authToken, user: userData } = response.data;
       
       setUser(userData);
       setToken(authToken);
-      localStorage.setItem("auth_token", authToken);
-      localStorage.setItem("auth_user", JSON.stringify(userData));
+      localStorage.setItem(AUTH_TOKEN_KEY, authToken);
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
     } catch (error) {
       throw new Error(error.response?.data?.message || "Signup failed");
     }
@@ -55,8 +57,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_user");
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
   };
 
   const updateUser = async (data) => {
@@ -65,7 +67,7 @@ export const AuthProvider = ({ children }) => {
       const { user: userData } = response.data;
       
       setUser(userData);
-      localStorage.setItem("auth_user", JSON.stringify(userData));
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
     } catch (error) {
       throw new Error(error.response?.data?.message || "Update failed");
     }
