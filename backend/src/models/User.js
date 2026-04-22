@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ['teacher', 'student'], default: 'teacher' },
   studentId: { type: String, unique: true, sparse: true },
   generatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  googleRefreshToken: { type: String, default: null },
+  googleAccessToken: { type: String, default: null },
+  googleTokenExpiry: { type: Date, default: null },
+  isGoogleConnected: { type: Boolean, default: false },
 }, { timestamps: true });
 
 // Hash password before saving

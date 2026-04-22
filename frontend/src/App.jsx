@@ -15,6 +15,8 @@ import ProfilePage from "@/pages/ProfilePage";
 import QuizPage from "@/pages/QuizPage";
 import RagPage from "@/pages/RagPage";
 import NotFound from "@/pages/NotFound";
+import AssignmentsPage from "@/pages/AssignmentsPage";
+import LiveClassPage from "@/pages/LiveClassPage";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +37,8 @@ const App = () => (
             <Route path="/quizzes" element={<ProtectedRoute><DashboardLayout><QuizPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><DashboardLayout><ProfilePage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/rag" element={<ProtectedRoute allowedRoles={['teacher']}><DashboardLayout><RagPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/assignments" element={<ProtectedRoute><DashboardLayout><AssignmentsPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/live" element={<ProtectedRoute><DashboardLayout><LiveClassPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

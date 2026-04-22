@@ -4,6 +4,7 @@ import { Readable } from 'stream';
 import { v2 as cloudinary } from 'cloudinary';
 import SavedContent from '../models/SavedContent.js';
 import Quiz from '../models/Quiz.js';
+import QuizResult from '../models/QuizResult.js';
 import User from '../models/User.js';
 
 const require = createRequire(import.meta.url);
@@ -420,5 +421,167 @@ export const deleteSavedContent = async (req, res) => {
     res.json({ message: 'Deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// ─── Submit Quiz Attempt (students, one-time) ─────────────────────────────────
+
+export const submitQuizAttempt = async (req, res) => {
+  try {
+    const { answers } = req.body; // array of selected indices
+    const quizId = req.params.id;
+
+    // Only students can attempt
+    const student = await User.findById(req.user._id);
+    if (student.role !== 'student') {
+      return res.status(403).json({ message: 'Only students can attempt quizzes' });
+    }
+
+    // Check already attempted
+    const existing = await QuizResult.findOne({ quiz: quizId, student: req.user._id });
+    if (existing) {
+      return res.status(409).json({ message: 'You have already attempted this quiz', result: existing });
+    }
+
+    const quiz = await Quiz.findById(quizId);
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+
+    const score = quiz.questions.reduce((acc, q, i) => acc + (answers[i] === q.correct ? 1 : 0), 0);
+    const total = quiz.questions.length;
+    const percentage = Math.round((score / total) * 100);
+
+    const result = await QuizResult.create({
+      quiz: quizId,
+      student: req.user._id,
+      answers,
+      score,
+      total,
+      percentage,
+    });
+
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ─── Get student's own result for a quiz ─────────────────────────────────────
+
+export const getMyQuizResult = async (req, res) => {
+  try {
+    const result = await QuizResult.findOne({ quiz: req.params.id, student: req.user._id });
+    res.json({ result: result || null });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ─── Get all results for a quiz (teacher) ────────────────────────────────────
+
+export const getQuizResults = async (req, res) => {
+  try {
+    const teacher = await User.findById(req.user._id);
+    if (teacher.role !== 'teacher') {
+      return res.status(403).json({ message: 'Only teachers can view all results' });
+    }
+    const results = await QuizResult.find({ quiz: req.params.id })
+      .populate('student', 'name email studentId')
+      .sort({ createdAt: -1 });
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ─── Download Quiz Results as PDF (teacher) ───────────────────────────────────
+
+export const downloadQuizResultsPDF = async (req, res) => {
+  try {
+    const teacher = await User.findById(req.user._id);
+    if (teacher.role !== 'teacher') {
+      return res.status(403).json({ message: 'Only teachers can download results' });
+    }
+
+    const quiz = await Quiz.findById(req.params.id);
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+
+    const results = await QuizResult.find({ quiz: req.params.id })
+      .populate('student', 'name email studentId')
+      .sort({ createdAt: -1 });
+
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="quiz-results-${quiz._id}.pdf"`);
+    doc.pipe(res);
+
+    // ── Header ──
+    doc.rect(0, 0, doc.page.width, 80).fill('#4F46E5');
+    doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(18)
+      .text(quiz.title, 50, 20, { width: doc.page.width - 100 });
+    doc.font('Helvetica').fontSize(11)
+      .text(`Topic: ${quiz.topic}  ·  Difficulty: ${quiz.difficulty}  ·  ${quiz.questions.length} questions`, 50, 46, { width: doc.page.width - 100 });
+    doc.fillColor('#C7D2FE').fontSize(9)
+      .text(`Generated on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, 50, 62);
+
+    doc.moveDown(3);
+
+    // ── Summary stats ──
+    if (results.length > 0) {
+      const avg = Math.round(results.reduce((s, r) => s + r.percentage, 0) / results.length);
+      const passed = results.filter((r) => r.percentage >= 70).length;
+      doc.fillColor('#1F2937').font('Helvetica-Bold').fontSize(11).text('Summary', 50, doc.y);
+      doc.moveDown(0.4);
+      doc.font('Helvetica').fontSize(10).fillColor('#374151')
+        .text(`Total Attempts: ${results.length}   ·   Average Score: ${avg}%   ·   Passed (≥70%): ${passed}/${results.length}`, 50);
+      doc.moveDown(1);
+    }
+
+    // ── Table header ──
+    const tableTop = doc.y;
+    const col = { name: 50, email: 180, studentId: 340, score: 430, pct: 490 };
+    const rowH = 28;
+
+    doc.rect(50, tableTop, doc.page.width - 100, rowH).fill('#EEF2FF');
+    doc.fillColor('#4F46E5').font('Helvetica-Bold').fontSize(9);
+    doc.text('NAME',      col.name,      tableTop + 9, { width: 120 });
+    doc.text('EMAIL',     col.email,     tableTop + 9, { width: 150 });
+    doc.text('STUDENT ID',col.studentId, tableTop + 9, { width: 80 });
+    doc.text('SCORE',     col.score,     tableTop + 9, { width: 50, align: 'center' });
+    doc.text('%',         col.pct,       tableTop + 9, { width: 50, align: 'center' });
+
+    // ── Table rows ──
+    if (results.length === 0) {
+      doc.moveDown(2);
+      doc.fillColor('#6B7280').font('Helvetica').fontSize(10)
+        .text('No students have attempted this quiz yet.', { align: 'center' });
+    } else {
+      results.forEach((r, idx) => {
+        const y = tableTop + rowH + idx * rowH;
+
+        // Alternate row background
+        if (idx % 2 === 0) doc.rect(50, y, doc.page.width - 100, rowH).fill('#F9FAFB');
+
+        const passed = r.percentage >= 70;
+        doc.fillColor('#111827').font('Helvetica').fontSize(9);
+        doc.text(r.student?.name || '—',      col.name,      y + 9, { width: 120 });
+        doc.text(r.student?.email || '—',     col.email,     y + 9, { width: 150 });
+        doc.text(r.student?.studentId || '—', col.studentId, y + 9, { width: 80 });
+        doc.fillColor('#111827')
+          .text(`${r.score}/${r.total}`, col.score, y + 9, { width: 50, align: 'center' });
+        doc.fillColor(passed ? '#16A34A' : '#DC2626').font('Helvetica-Bold')
+          .text(`${r.percentage}%`, col.pct, y + 9, { width: 50, align: 'center' });
+
+        // Row border
+        doc.moveTo(50, y + rowH).lineTo(doc.page.width - 50, y + rowH)
+          .strokeColor('#E5E7EB').lineWidth(0.5).stroke();
+      });
+    }
+
+    doc.end();
+  } catch (error) {
+    console.error('PDF download error:', error.message);
+    if (!res.headersSent) res.status(500).json({ message: error.message });
   }
 };

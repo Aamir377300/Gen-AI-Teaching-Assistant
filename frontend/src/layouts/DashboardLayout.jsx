@@ -2,31 +2,34 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
-  LayoutDashboard, Sparkles, FolderOpen, UserCircle, LogOut, BookOpen, Menu, X, ClipboardList, Brain,
+  LayoutDashboard, Sparkles, FolderOpen, UserCircle, LogOut, BookOpen, Menu, X, ClipboardList, Brain, Video, FileText,
 } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
 
 const getNavItems = (role) => {
-  const common = [
-    { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-    { label: "Saved Materials", icon: FolderOpen, path: "/saved" },
-    { label: "Quizzes", icon: ClipboardList, path: "/quizzes" },
-    { label: "Profile", icon: UserCircle, path: "/profile" },
-  ];
-  
   if (role === 'student') {
-    return common;
+    return [
+      { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+      { label: "Saved Materials", icon: FolderOpen, path: "/saved" },
+      { label: "Quizzes", icon: ClipboardList, path: "/quizzes" },
+      { label: "Assignments", icon: FileText, path: "/assignments" },
+      { label: "Live Class", icon: Video, path: "/live" },
+      { label: "Profile", icon: UserCircle, path: "/profile" },
+    ];
   }
-  
+
   return [
     { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
     { label: "Generate Quiz", icon: Sparkles, path: "/generate" },
     { label: "Saved Materials", icon: FolderOpen, path: "/saved" },
     { label: "Quizzes", icon: ClipboardList, path: "/quizzes" },
+    { label: "Assignments", icon: FileText, path: "/assignments" },
+    { label: "Live Class", icon: Video, path: "/live" },
     { label: "Chat Assistant", icon: Brain, path: "/rag" },
     { label: "Profile", icon: UserCircle, path: "/profile" },
   ];
 };
+
 
 const DashboardLayout = ({ children }) => {
   const { user, logout } = useAuth();

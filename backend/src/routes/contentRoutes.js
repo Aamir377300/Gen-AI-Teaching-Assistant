@@ -10,6 +10,10 @@ import {
   getSavedQuizzes,
   deleteSavedContent,
   deleteQuiz,
+  submitQuizAttempt,
+  getMyQuizResult,
+  getQuizResults,
+  downloadQuizResultsPDF,
 } from '../controllers/contentController.js';
 import { protect } from '../middleware/auth.js';
 
@@ -28,5 +32,11 @@ router.get('/saved/quizzes', protect, getSavedQuizzes);
 
 router.delete('/saved/:id', protect, deleteSavedContent);
 router.delete('/quiz/:id', protect, deleteQuiz);
+
+// Quiz attempt routes
+router.post('/quiz/:id/attempt', protect, submitQuizAttempt);
+router.get('/quiz/:id/my-result', protect, getMyQuizResult);
+router.get('/quiz/:id/results', protect, getQuizResults);
+router.get('/quiz/:id/results/pdf', protect, downloadQuizResultsPDF);
 
 export default router;

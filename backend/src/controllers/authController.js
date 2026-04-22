@@ -28,6 +28,7 @@ export const signup = async (req, res) => {
         email: user.email,
         gradeLevel: user.gradeLevel,
         curriculum: user.curriculum,
+        isGoogleConnected: user.isGoogleConnected || false,
       },
     });
   } catch (error) {
@@ -63,6 +64,7 @@ export const login = async (req, res) => {
         email: user.email,
         gradeLevel: user.gradeLevel,
         curriculum: user.curriculum,
+        isGoogleConnected: user.isGoogleConnected || false,
       },
     });
   } catch (error) {
