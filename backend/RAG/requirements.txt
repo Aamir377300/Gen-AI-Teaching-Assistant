@@ -1,0 +1,9 @@
+PyMuPDF
+sentence-transformers
+numpy
+requests
+python-dotenv
+fastapi
+uvicorn
+python-multipart
+pinecone
