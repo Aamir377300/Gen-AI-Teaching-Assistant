@@ -2,8 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 
-# Load from the single shared backend .env
-load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 
 APP_ENV = os.getenv("APP_ENV", "local")
 HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")

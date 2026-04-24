@@ -10,7 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-# Load from the single shared backend .env
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 from rag_app.services.pdf_loader import extract_text_from_pdf
