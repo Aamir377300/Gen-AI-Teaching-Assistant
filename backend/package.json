@@ -7,6 +7,7 @@
     "dev": "concurrently -n \"NODE,FASTAPI\" -c \"bold.cyan,bold.yellow\" \"nodemon src/server.js\" \"cd RAG && python3 -m uvicorn api.api:app --reload --port 8000\""
   },
   "dependencies": {
+    "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.9.0",
     "cors": "^2.8.5",
