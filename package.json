@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "AI-powered class assistant application",
   "scripts": {
+    "install": "cd backend && npm install",
+    "start": "cd backend && npm start",
     "install:all": "cd backend && npm install && cd ../frontend && npm install",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
