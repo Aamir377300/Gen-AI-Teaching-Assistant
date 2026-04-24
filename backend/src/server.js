@@ -22,8 +22,16 @@ const allowedOrigins = process.env.FRONTEND_URL
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Forcefully allow all origins to bypass CORS issues for Vercel
-    callback(null, true);
+    // Allow server-to-server requests and REST tools
+    if (!origin) return callback(null, true);
+    
+    // Check against allowed origins list or if it's a Vercel preview branch
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    
+    console.warn(`CORS blocked request from: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
