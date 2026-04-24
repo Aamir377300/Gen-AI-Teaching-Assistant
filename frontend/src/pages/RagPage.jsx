@@ -6,6 +6,22 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
+function stripMarkdown(text) {
+  if (!text) return "";
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "$1")   // **bold**
+    .replace(/\*(.+?)\*/g, "$1")        // *italic*
+    .replace(/__(.+?)__/g, "$1")        // __bold__
+    .replace(/_(.+?)_/g, "$1")          // _italic_
+    .replace(/#{1,6}\s+/g, "")          // # headings
+    .replace(/`{1,3}([^`]*)`{1,3}/g, "$1") // `code`
+    .replace(/^\s*[-*+]\s+/gm, "• ")   // bullet lists → •
+    .replace(/^\s*\d+\.\s+/gm, "")     // numbered lists
+    .replace(/\[(.+?)\]\(.+?\)/g, "$1") // [links](url)
+    .replace(/>\s+/g, "")               // blockquotes
+    .trim();
+}
+
 export default function RagPage() {
   const { toast } = useToast();
   
@@ -275,7 +291,7 @@ export default function RagPage() {
                 </div>
               )}
               <div className={`max-w-[75%] rounded-xl px-4 py-3 text-sm ${m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-muted/40 border border-border text-foreground rounded-tl-sm"}`}>
-                <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
+                <div className="whitespace-pre-wrap leading-relaxed">{stripMarkdown(m.content)}</div>
                 {m.imageUrl && (
                   <div className="mt-3">
                     <img src={m.imageUrl} alt="Attached" className="max-w-[300px] max-h-[300px] rounded-md border border-border object-contain bg-background" />

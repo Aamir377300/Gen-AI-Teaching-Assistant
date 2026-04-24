@@ -2,7 +2,8 @@ import os
 from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load from the single shared backend .env
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 index_name = os.getenv("PINECONE_INDEX_NAME", "aiassistant")

@@ -10,12 +10,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+# Load from the single shared backend .env
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+
 from rag_app.services.pdf_loader import extract_text_from_pdf
 from rag_app.services.text_splitter import split_text_into_chunks
 from rag_app.services.embeddings import generate_embedding
 from rag_app.services.vector_store import store_embeddings_pinecone, delete_namespace, retrieve_from_pinecone
-
-load_dotenv()
 
 app = FastAPI(title="RAG Teaching Assistant API - Core Vector Services", version="2.0.0")
 
@@ -26,7 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# RAG: Upload PDF (Embed & Store) 
+# RAG: Upload PDF (Embed & Store)
 
 @app.post("/rag/upload")
 async def rag_upload(
@@ -47,7 +48,7 @@ async def rag_upload(
         try:
             delete_namespace(ns)
         except Exception:
-            pass 
+            pass
 
         text = extract_text_from_pdf(tmp_path)
         if not text.strip():
@@ -71,7 +72,7 @@ async def rag_upload(
     }
 
 
-# RAG: Retrieve Chunks 
+# RAG: Retrieve Chunks
 
 class RetrieveRequest(BaseModel):
     namespace: str

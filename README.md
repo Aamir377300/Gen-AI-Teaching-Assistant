@@ -17,9 +17,10 @@ No more copy-pasting from ChatGPT into Word docs. Everything lives in one place.
 ### 👩‍🏫 For Teachers
 - **AI Content Generation** — Generate detailed notes, presentation slides, and MCQ quizzes on any topic using Groq (Llama 3.1)
 - **PDF Export** — Download generated notes and slides as beautifully formatted PDFs, uploaded to Cloudinary
-- **Assignments** — Create assignments with file attachments, set deadlines, and review student submissions
+- **Assignments** — Create or AI-generate assignments with file attachments, set deadlines, and review student submissions
 - **Live Classes** — Connect your Google account and instantly spin up a Google Meet link for your students
-- **Chat Assistant (RAG)** — Upload your own PDFs and ask questions — the AI answers strictly from your documents using Pinecone vector search
+- **Chat Assistant** — Persistent multi-session AI chat with image support (Llama 3.2 Vision) and conversation history
+- **RAG (PDF Chat)** — Upload your own PDFs and ask questions — the AI answers strictly from your documents using Pinecone vector search. Also generate notes, slides, or quizzes directly from a PDF
 - **Quiz Results** — See every student's score in a modal, download a full results sheet as a PDF
 
 ### 🧑‍🎓 For Students
@@ -27,6 +28,7 @@ No more copy-pasting from ChatGPT into Word docs. Everything lives in one place.
 - **Attempt quizzes** — One attempt per quiz, results saved permanently to MongoDB
 - **Submit assignments** — Upload files directly from the browser
 - **Join live classes** — See your teacher's active Google Meet link the moment it goes live (auto-refreshes every 30s)
+- **Chat Assistant** — Ask the AI questions in a persistent chat with full conversation history
 
 ---
 
@@ -36,7 +38,7 @@ No more copy-pasting from ChatGPT into Word docs. Everything lives in one place.
 |---|---|
 | Frontend | React 18, Vite, Tailwind CSS, shadcn/ui, React Router |
 | Backend | Node.js, Express, MongoDB, Mongoose, JWT |
-| AI / LLM | Groq API (Llama 3.1 8B) |
+| AI / LLM | Groq API (Llama 3.1 8B for text, Llama 3.2 11B Vision for images) |
 | RAG | Python FastAPI, Pinecone, sentence-transformers |
 | File Storage | Cloudinary |
 | Google Integration | Google Calendar API (per-user OAuth) |
@@ -133,6 +135,7 @@ GOOGLE_REDIRECT_URI=http://localhost:5002/api/gauth/callback
 
 PINECONE_API_KEY=your_pinecone_api_key
 PINECONE_INDEX_NAME=your_index_name
+PYTHON_RAG_URL=http://localhost:8000
 ```
 
 **RAG service** — copy and fill in `backend/RAG/.env`:
@@ -216,20 +219,76 @@ Students log in with a generated Student ID + password. They can only see conten
 
 ## API Overview
 
+### Auth
 | Method | Endpoint | Description |
 |---|---|---|
 | POST | `/api/auth/signup` | Teacher registration |
 | POST | `/api/auth/login` | Login (email or student ID) |
+| GET | `/api/auth/me` | Get current user profile |
+| PUT | `/api/auth/update` | Update profile |
+| POST | `/api/auth/generate-students` | Teacher generates student accounts |
+
+### Content
+| Method | Endpoint | Description |
+|---|---|---|
 | POST | `/api/content/generate` | Generate notes |
+| POST | `/api/content/generate/slides` | Generate slides |
 | POST | `/api/content/generate/quiz` | Generate quiz |
+| POST | `/api/content/saved` | Save notes |
+| POST | `/api/content/saved/slides` | Save slides |
+| POST | `/api/content/saved/quiz` | Save quiz |
+| GET | `/api/content/saved` | Get saved notes/slides |
+| GET | `/api/content/saved/quizzes` | Get saved quizzes |
+| DELETE | `/api/content/saved/:id` | Delete saved content |
+| DELETE | `/api/content/quiz/:id` | Delete quiz |
 | POST | `/api/content/quiz/:id/attempt` | Submit quiz attempt (students, once only) |
+| GET | `/api/content/quiz/:id/my-result` | Get own quiz result (student) |
 | GET | `/api/content/quiz/:id/results` | Get all student results (teacher) |
 | GET | `/api/content/quiz/:id/results/pdf` | Download results as PDF |
-| POST | `/api/live/start` | Start a live class (creates Google Meet) |
-| GET | `/api/live/active` | Get active class for a student |
-| GET | `/api/gauth/connect` | Initiate Google OAuth for a teacher |
-| POST | `/api/assignments` | Create assignment |
+
+### Chat (AI Assistant)
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/chat/sessions` | List all chat sessions |
+| POST | `/api/chat/sessions` | Create a new chat session |
+| GET | `/api/chat/sessions/:id` | Get a session with messages |
+| PUT | `/api/chat/sessions/:id/namespace` | Attach a PDF namespace to a session |
+| POST | `/api/chat/sessions/:id/message` | Send a message (supports images via base64) |
+
+### RAG (PDF Intelligence)
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/rag/upload` | Upload PDF → embed and store in Pinecone |
+| POST | `/api/rag/ask` | Ask a question against a PDF namespace |
+| POST | `/api/rag/generate-content` | Generate notes or slides from a PDF |
+| POST | `/api/rag/generate-quiz` | Generate a quiz from a PDF |
+
+### Assignments
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/assignments/generate` | AI-generate an assignment |
+| POST | `/api/assignments` | Create assignment (with optional file) |
+| GET | `/api/assignments/teacher` | Get teacher's assignments |
+| GET | `/api/assignments/student` | Get student's assignments |
 | POST | `/api/assignments/:id/submit` | Submit assignment |
+| GET | `/api/assignments/:id/submissions` | View submissions (teacher) |
+| DELETE | `/api/assignments/:id` | Delete assignment |
+
+### Live Classes
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/live/start` | Start a live class (creates Google Meet) |
+| PUT | `/api/live/:id/end` | End a live class |
+| GET | `/api/live/teacher` | Get teacher's live class history |
+| GET | `/api/live/active` | Get active class for a student |
+
+### Google OAuth
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/gauth/connect` | Initiate Google OAuth for a teacher |
+| GET | `/api/gauth/callback` | OAuth callback (handled automatically) |
+| POST | `/api/gauth/disconnect` | Disconnect Google account |
+| GET | `/api/gauth/status` | Check if Google is connected |
 
 ---
 
