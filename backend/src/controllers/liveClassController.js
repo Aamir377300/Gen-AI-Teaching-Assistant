@@ -2,7 +2,7 @@ import { google } from 'googleapis';
 import LiveClass from '../models/LiveClass.js';
 import User from '../models/User.js';
 
-// ─── Build an authenticated OAuth2 client for a specific teacher ──────────────
+// Build an authenticated OAuth2 client for a specific teacher 
 const getOAuthClientForTeacher = (teacher) => {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -109,7 +109,7 @@ export const startLiveClass = async (req, res) => {
   }
 };
 
-// ─── Teacher: End Live Class ──────────────────────────────────────────────────
+// Teacher: End Live Class 
 export const endLiveClass = async (req, res) => {
   try {
     const liveClass = await LiveClass.findOneAndUpdate(
@@ -124,7 +124,7 @@ export const endLiveClass = async (req, res) => {
   }
 };
 
-// ─── Teacher: Get My Live Classes ─────────────────────────────────────────────
+// Teacher: Get My Live Classes
 export const getTeacherLiveClasses = async (req, res) => {
   try {
     const classes = await LiveClass.find({ teacher: req.user._id })
@@ -136,7 +136,7 @@ export const getTeacherLiveClasses = async (req, res) => {
   }
 };
 
-// ─── Student: Get Active Live Class for their board ───────────────────────────
+// Student: Get Active Live Class for their board
 export const getActiveLiveClass = async (req, res) => {
   try {
     const student = await User.findById(req.user._id);

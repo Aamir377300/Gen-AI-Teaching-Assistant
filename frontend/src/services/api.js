@@ -1,7 +1,12 @@
 import axios from "axios";
 import { AUTH_TOKEN_KEY } from "@/lib/constants";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5002/api";
+let API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5002/api";
+
+// Defensively ensure the base URL ends with /api to match the backend routes
+if (!API_BASE_URL.endsWith('/api') && !API_BASE_URL.endsWith('/api/')) {
+  API_BASE_URL = API_BASE_URL.replace(/\/$/, '') + '/api';
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,

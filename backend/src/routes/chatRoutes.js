@@ -7,7 +7,7 @@ import { protect } from '../middleware/auth.js';
 const router = express.Router();
 const PYTHON_API = process.env.PYTHON_RAG_URL || 'http://localhost:8000';
 
-// ─── HELPER: Fetch Context from Pinecone ────────────────────────
+// HELPER: Fetch Context from Pinecone 
 async function fetchContext(namespace, query, top_k = 5) {
   try {
     const response = await axios.post(`${PYTHON_API}/rag/retrieve`, {
@@ -20,7 +20,7 @@ async function fetchContext(namespace, query, top_k = 5) {
   }
 }
 
-// ─── GET /api/chat/sessions ─────────────────────────────────────
+// GET /api/chat/sessions
 router.get('/sessions', protect, async (req, res) => {
   try {
     const sessions = await ChatSession.find({ user: req.user._id })
@@ -32,7 +32,7 @@ router.get('/sessions', protect, async (req, res) => {
   }
 });
 
-// ─── POST /api/chat/sessions ────────────────────────────────────
+// POST /api/chat/sessions
 router.post('/sessions', protect, async (req, res) => {
   try {
     const { title, pdfNamespace } = req.body;
@@ -48,7 +48,7 @@ router.post('/sessions', protect, async (req, res) => {
   }
 });
 
-// ─── GET /api/chat/sessions/:id ─────────────────────────────────
+// GET /api/chat/sessions/:id
 router.get('/sessions/:id', protect, async (req, res) => {
   try {
     const session = await ChatSession.findOne({ _id: req.params.id, user: req.user._id });

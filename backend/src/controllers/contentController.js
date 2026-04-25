@@ -28,7 +28,7 @@ const difficultyGuide = {
   advanced: 'in-depth analysis, technical terminology, assume strong prior knowledge',
 };
 
-// ─── Generate Notes ───────────────────────────────────────────────────────────
+// Generate Notes 
 
 export const generateNotes = async (req, res) => {
   try {

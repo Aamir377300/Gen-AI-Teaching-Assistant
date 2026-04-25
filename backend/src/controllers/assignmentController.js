@@ -12,7 +12,7 @@ const configCloudinary = () => {
   });
 };
 
-// ─── Teacher: Create Assignment ───────────────────────────────────────────────
+// ─── Teacher: Create Assignment
 export const createAssignment = async (req, res) => {
   try {
     if (req.user.role !== 'teacher') {
