@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import mongoose from 'mongoose';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import contentRoutes from './routes/contentRoutes.js';
@@ -30,8 +31,8 @@ const corsOptions = {
       return callback(null, true);
     }
     
-    console.warn(`CORS blocked request from: ${origin}`);
-    callback(new Error('Not allowed by CORS'));
+    console.warn(`CORS blocked request from origin: "${origin}". Check your FRONTEND_URL environment variable.`);
+    callback(new Error(`Not allowed by CORS: ${origin}`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -43,6 +44,17 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
 app.use(express.json());
+
+// Health Check Endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development',
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    python_rag: process.env.PYTHON_RAG_URL || 'http://localhost:8000'
+  });
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/content', contentRoutes);

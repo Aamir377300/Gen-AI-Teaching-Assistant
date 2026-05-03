@@ -292,3 +292,29 @@ Students log in with a generated Student ID + password. They can only see conten
 
 ---
 
+
+---
+
+## 🚀 Deployment & Environment Checkpoints
+
+When moving from local development to production (e.g., Render), use this checklist to ensure all connections are correctly configured.
+
+### Comparison Table: Local vs. Render
+
+| Feature | Localhost Checkpoint | Render (Production) Checkpoint |
+|---|---|---|
+| **Frontend API URL** | `VITE_API_BASE_URL=http://localhost:5002/api` | `VITE_API_BASE_URL=https://your-backend.onrender.com/api` |
+| **Backend CORS** | `FRONTEND_URL=http://localhost:8080` | `FRONTEND_URL=https://your-frontend.vercel.app` |
+| **MongoDB** | `MONGODB_URI=mongodb://localhost:27017/...` | `MONGODB_URI=mongodb+srv://user:pass@cluster...` |
+| **Google Redirect** | `http://localhost:5002/api/gauth/callback` | `https://your-backend.onrender.com/api/gauth/callback` |
+| **Python RAG URL** | `http://localhost:8000` | `https://your-python-service.onrender.com` |
+| **Node.js Port** | `5002` (manually set) | `PORT` (automatically set by Render) |
+
+### 🛠️ Verification Commands
+
+Once deployed, you can verify your backend's health by visiting:
+`https://your-backend.onrender.com/api/health`
+
+This will return a JSON object showing the status of your Database and Python RAG connections.
+
+---
